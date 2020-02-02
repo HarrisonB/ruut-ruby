@@ -1,0 +1,91 @@
+#!/usr/bin/env ruby
+
+TERMINATING = ['(', ')', ',']
+
+def terminating?(ch)
+  TERMINATING.include?(ch)
+end
+
+def present?(str)
+  str.match?(/[^[:space:]]/)
+end
+
+def tokenize(str)
+  cur_name = ''
+  tokens = []
+  str.each_char do |c|
+    if terminating?(c)
+      tokens << cur_name.strip if present?(cur_name)
+      cur_name = ''
+    end
+
+    case c
+    when '('
+      tokens << :paren_open
+    when ')'
+      tokens << :paren_close
+    when ','
+      tokens << :comma
+    else
+      cur_name << c
+    end
+  end
+
+  tokens
+end
+
+def parse_tokens(tokens)
+  nodes = []
+  cur_node = nil
+  while token = tokens.shift
+    case token
+    when String
+      cur_node = empty_node(:name => token)
+      nodes << cur_node
+    when :paren_open
+      cur_node[:children] = parse_tokens(tokens)
+    when :paren_close
+      break
+    end
+  end
+  nodes
+end
+
+def empty_node(name:)
+  { :name => name, :children => nil }
+end
+
+def parse(str)
+  tokens = tokenize(str)
+  parse_tokens(tokens).first
+end
+
+def node_to_strings(node)
+  lines = [node[:name]]
+  node[:children]&.slice(0...-1)&.each do |child_node|
+    child_node_strs = node_to_strings(child_node)
+    lines += \
+      [ "├── #{child_node_strs[0]}" ] + 
+      child_node_strs[1..-1].map do |child_node_str|
+        "│   #{child_node_str}"
+      end
+  end
+  last_child_node = node[:children]&.last
+  if last_child_node
+    last_child_node_strs = node_to_strings(last_child_node)
+    lines += \
+      [ "└── #{last_child_node_strs[0]}" ] + 
+      last_child_node_strs[1..-1].map do |child_node_str|
+        "    #{child_node_str}"
+      end
+  end
+  lines
+end
+
+def ruut(str)
+  root_node = parse(str)
+  node_to_strings(root_node).join("\n")
+end
+
+serialized_structure = ARGV[0] || STDIN.read
+puts ruut(serialized_structure)
