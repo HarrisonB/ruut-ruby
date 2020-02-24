@@ -1,4 +1,6 @@
-# ruut
+# ruut-ruby
+
+**This project is no longer maintained. [Check out the rewrite in Rust][ruut-rust].**
 
 ## Why
 
@@ -75,5 +77,6 @@ Parent
 
 Note that whitespace in  the middle of a folder name is preserved.
 
+[ruut-rust]: https://github.com/HarrisonB/ruut
 [tree-wiki]: https://en.wikipedia.org/wiki/Tree_(command) 
 [lisp-parser-python]: https://norvig.com/lispy.html
